@@ -7,6 +7,7 @@ var bodyParser = require('body-parser');
 var sassMiddleware = require('node-sass-middleware');
 var expressHbs = require('express-handlebars');
 var mongoose = require('mongoose');
+var session = require('express-session');
 
 var index = require('./routes/index');
 
@@ -25,6 +26,7 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
+app.use(session({secret: 'secretstring', resave: false, saveUninitialized: true}));
 app.use(sassMiddleware({
     src: path.join(__dirname, 'public/scss'),
     dest: path.join(__dirname, 'public/css'),
