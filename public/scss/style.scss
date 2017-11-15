@@ -1,0 +1,36 @@
+$thumbnailPadding: 20px;
+
+.thumbnail {
+  min-height: 450px;
+  padding: $thumbnailPadding;
+  position: relative;
+
+
+  img{
+    max-height: 250px;
+  }
+
+  .caption {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: $thumbnailPadding;
+
+    .description {
+      color: #7f7f7f;
+    }
+
+    .clearfix {
+      position: relative;
+
+      .price {
+        font-weight: bold;
+        font-size: 16px;
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+      }
+    }
+  }
+}
