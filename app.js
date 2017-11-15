@@ -11,40 +11,66 @@ var session = require('express-session');
 var passport = require('passport');
 var flash = require('connect-flash');
 var validator = require('express-validator');
+var MongoStore = require('connect-mongo');
 
-var index = require('./routes/index');
+var routes = require('./routes/index');
+var userRoutes = require('./routes/user');
 
 var app = express();
 
 //mongoose setup for mongodb
-mongoose.connect('mongodb://localhost:27017/shopping', { useMongoClient: true });
+mongoose.connect('mongodb://localhost:27017/shopping', {
+  useMongoClient: true
+});
 require('./config/passport');
 
 // view engine setup
-app.engine('.hbs', expressHbs({defaultLayout: 'layout', extname: '.hbs'}));
+app.engine('.hbs', expressHbs({
+  defaultLayout: 'layout',
+  extname: '.hbs'
+}));
 app.set('view engine', '.hbs');
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(logger('dev'));
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({
+  extended: false
+}));
 app.use(validator());
 app.use(cookieParser());
-app.use(session({secret: 'secretstring', resave: false, saveUninitialized: true}));
+app.use(session({
+  secret: 'secretstring',
+  resave: false,
+  saveUninitialized: true,
+  store: new MongoStore({
+    mogooseConnection: mongoose.connection
+  }),
+  cookie: {
+    maxAge: 180 * 60 * 1000
+  }
+}));
 app.use(flash());
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(sassMiddleware({
-    src: path.join(__dirname, 'public/scss'),
-    dest: path.join(__dirname, 'public/css'),
-    debug: true,
-    outputStyle: 'compressed',
-    prefix:  '/css'
+  src: path.join(__dirname, 'public/scss'),
+  dest: path.join(__dirname, 'public/css'),
+  debug: true,
+  outputStyle: 'compressed',
+  prefix: '/css'
 }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', index);
+app.use(function(req, res, next) {
+  res.locals.login = req.isAuthenticated();
+  res.locals.session = req.session;
+  next();
+})
+
+app.use('/user', userRoutes);
+app.use('/', routes);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
