@@ -8,6 +8,8 @@ var sassMiddleware = require('node-sass-middleware');
 var expressHbs = require('express-handlebars');
 var mongoose = require('mongoose');
 var session = require('express-session');
+var passport = require('passport');
+var flash = require('connect-flash');
 
 var index = require('./routes/index');
 
@@ -15,6 +17,7 @@ var app = express();
 
 //mongoose setup for mongodb
 mongoose.connect('mongodb://localhost:27017/shopping', { useMongoClient: true });
+require('./config/passport');
 
 // view engine setup
 app.engine('.hbs', expressHbs({defaultLayout: 'layout', extname: '.hbs'}));
@@ -27,6 +30,9 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(session({secret: 'secretstring', resave: false, saveUninitialized: true}));
+app.use(flash());
+app.use(passport.initialize());
+app.use(passport.session());
 app.use(sassMiddleware({
     src: path.join(__dirname, 'public/scss'),
     dest: path.join(__dirname, 'public/css'),
