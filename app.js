@@ -11,7 +11,7 @@ var session = require('express-session');
 var passport = require('passport');
 var flash = require('connect-flash');
 var validator = require('express-validator');
-var MongoStore = require('connect-mongo');
+var MongoStore = require('connect-mongo')(session);
 
 var routes = require('./routes/index');
 var userRoutes = require('./routes/user');
@@ -22,6 +22,7 @@ var app = express();
 mongoose.connect('mongodb://localhost:27017/shopping', {
   useMongoClient: true
 });
+
 require('./config/passport');
 
 // view engine setup
@@ -45,7 +46,7 @@ app.use(session({
   resave: false,
   saveUninitialized: true,
   store: new MongoStore({
-    mogooseConnection: mongoose.connection
+    mongooseConnection: mongoose.connection
   }),
   cookie: {
     maxAge: 180 * 60 * 1000
