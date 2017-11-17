@@ -1,95 +1,25 @@
 var express = require('express');
 var router = express.Router();
+var userController = require('../controllers/user');
 var csrf = require('csurf');
 var passport = require('passport');
-
-var Cart = require('../models/cart');
-var Order = require('../models/order');
 
 var csrfProtection = csrf();
 router.use(csrfProtection);
 
+router.use(['/profile', '/logout'], userController.isLoggedIn);
+router.get('/profile', userController.showProfilePage);
 
-router.get('/profile', isLoggedIn, function(req, res, next) {
-  Order.find({
-    user: req.user
-  }, function(err, orders) {
-    console.log("###################");
-    if(err)
-      return console.error(err);
-    console.log("$$$$$$$$$$$$$$$$$$$$");
-    var cart;
-    orders.forEach(function(order) {
-      cart = new Cart(order.cart);
-      console.log(cart);
-      order.items = cart.generateArray();
-    });
-    console.log('asfdasdadcasdsadfafadfadasfcadasfsafvas');
-    res.render('user/profile', {
-      orders: orders
-    });
-  });
-});
+router.get('/logout', userController.logout);
 
-router.get('/logout', isLoggedIn, function(req, res, next) {
-  req.logout();
-  res.redirect('/');
-});
+router.use('/', userController.notLoggedIn);
 
-router.use('/', notLoggedIn);
+router.get('/signup', userController.showSignUpPage);
 
-router.get('/signup', function(req, res, next) {
-  var messages = req.flash('error');
-  res.render('user/signup', {
-    csrfToken: req.csrfToken(),
-    messages: messages,
-    hasError: messages.length > 0
-  });
-});
+router.post('/signup', userController.passportLocalSignUp, userController.signUp);
 
-router.post('/signup', passport.authenticate('local.signup', {
-  failureRedirect: '/user/signup',
-  failureFlash: true
-}), function(req, res, next) {
-  if (req.session.oldUrl) {
-    var oldUrl = req.session.oldUrl;
-    req.session.oldUrl = null;
-    res.redirect(oldUrl);
-  } else {
-    res.redirect('/user/profile');
-  }
-});
+router.get('/signin', userController.showSignInPage);
 
-router.get('/signin', function(req, res, next) {
-  var messages = req.flash('error');
-  res.render('user/signin', {
-    csrfToken: req.csrfToken(),
-    messages: messages,
-    hasError: messages.length > 0
-  });
-});
-
-router.post('/signin', passport.authenticate('local.signin', {
-  failureRedirect: '/user/signin',
-  failureFlash: true
-}), function(req, res, next) {
-  if (req.session.oldUrl) {
-    var oldUrl = req.session.oldUrl;
-    req.session.oldUrl = null;
-    res.redirect(oldUrl);
-  } else {
-    res.redirect('/user/profile');
-  }
-});
+router.post('/signin', userController.passportLocalSignIn, userController.signIn);
 
 module.exports = router;
-
-function isLoggedIn(req, res, next) {
-  if (req.isAuthenticated()) return next();
-  res.redirect('/user/signin');
-}
-
-function notLoggedIn(req, res, next) {
-  if (!req.isAuthenticated()) return next();
-  res.redirect('/user/profile');
-}
