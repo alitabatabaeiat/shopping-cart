@@ -13,7 +13,7 @@ var flash = require('connect-flash');
 var validator = require('express-validator');
 var MongoStore = require('connect-mongo')(session);
 
-var routes = require('./routes/index');
+var mainRoutes = require('./routes/main');
 var userRoutes = require('./routes/user');
 
 var app = express();
@@ -71,7 +71,7 @@ app.use(function(req, res, next) {
 })
 
 app.use('/user', userRoutes);
-app.use('/', routes);
+app.use('/', mainRoutes);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

@@ -1,9 +1,9 @@
-var Cart = require('../models/cart');
-var Order = require('../models/order');
 var passport = require('passport');
 
+var Cart = require('../models/cart');
+var Order = require('../models/order');
 
-var controller = {}
+var controller = {};
 
 controller.showProfilePage = function(req, res, next) {
   Order.find({
